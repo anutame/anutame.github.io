@@ -7,51 +7,71 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div>
-        <h1>Основы верстки на Hexlet</h1>
-
-        <p>
-            В профессии «Верстальщик» вы изучите множество популярных технологий,
-            которые используют при создании верстки.
-        </p>
-
-        <p>
-            Узнаете о работе с CSS, препроцессорами, немного попрограммируете. Изучите
-            Bootstrap и научитесь проверять свой код с помощью специальных утилит.
-        </p>
-    </div>
-
-    <main>
-    
-        <h1>Резюме</h1>
-        <h2>Разработчик веб-приложений</h2>
-        <section class="study">
-            <h2>Образование</h2>
-            <ul>
-                <li class="place-of-study">Место учёбы №1</li>
-                <li class="place-of-study">Место учёбы №2</li>
-                <li class="place-of-study">Место учёбы №3</li>
-            </ul>
-        </section>
-    
-
-    
-        <h1>Emmet</h1>
-        <ul>
-            <li></li>
-            <li></li>
-            <li></li>
-        </ul>
-        <p>Emmet помогает мне верстать сайт</p>
-        <p>Emmet помогает мне верстать сайт</p>
-        <p>Emmet помогает мне верстать сайт</p>
-        <p>Emmet помогает мне верстать сайт</p>
-        <p>Emmet помогает мне верстать сайт</p>
-        <p>Emmet помогает мне верстать сайт</p>
-        <p>Emmet помогает мне верстать сайт</p>
-        <p>Emmet помогает мне верстать сайт</p>
-        <p>Emmet помогает мне верстать сайт</p>
-        <p>Emmet помогает мне верстать сайт</p>
-    </main>
+    <header class="header">
+        <div class="header-content">
+          <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/39106215d4d83527f92cf88413c2fe0e6294c7af7a6f792c07ab49ca4678ebc1?apiKey=caeb692b74c74389932f5520891447b3&" alt="Abracadabra Conference Logo" class="logo" />
+          <nav class="nav-links">
+            <a href="#about" class="nav-link">О нас</a>
+            <a href="#faq" class="nav-link">FAQ</a>
+          </nav>
+        </div>
+      </header>
+      
+      <section class="hero">
+        <div class="hero-content">
+          <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/d4dd667f823fa8cc6c713ccbf6c7aca7cc6dd2a0f3c1a61b2c5d65f00aa3b2ed?apiKey=caeb692b74c74389932f5520891447b3&" alt="Conference background image" class="hero-bg" />
+          <div class="hero-text">
+            <h1 class="hero-title">Abracadabra</h1>
+            <p class="hero-subtitle">Конференция по поводу чего угодно</p>
+            <a href="#register" class="cta-button">Зарегистрироваться</a>
+          </div>
+        </div>
+      </section>
+      
+      <section class="features">
+        <h2 class="features-title">Что такое Abracadabra?</h2>
+        <div class="features-grid">
+          <div class="features-row">
+            <article class="feature-card">
+              <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/6ceed1c130f1733c3ad022bacc0879940ca366340fcbdc8fb4aab0a8dbe71eaa?apiKey=caeb692b74c74389932f5520891447b3&" alt="Summer refreshments" class="feature-image" />
+              <div class="feature-content">
+                <h3 class="feature-title">Летняя прохлада</h3>
+                <p class="feature-description">Домашние лимонады и сорбеты на любой вкус</p>
+              </div>
+            </article>
+            <article class="feature-card">
+              <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/edbc7f4bb7485e6f8c52e2174bea5d735dc4e2a36b2f92efeabceef46cc683c6?apiKey=caeb692b74c74389932f5520891447b3&" alt="Relaxation area" class="feature-image" />
+              <div class="feature-content">
+                <h3 class="feature-title">Полный релакс</h3>
+                <p class="feature-description">Можно ни о чем не думать</p>
+              </div>
+            </article>
+            <article class="feature-card">
+              <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/c4e1f68a2bcacc1862712ae422f4c59d680dfe81e375c1666bca7f9fab77f10e?apiKey=caeb692b74c74389932f5520891447b3&" alt="Lecture hall" class="feature-image" />
+              <div class="feature-content">
+                <h3 class="feature-title">Лекции</h3>
+                <p class="feature-description">От специалистов по отдыху и наслаждению</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+      
+      <footer class="footer">
+        <div class="footer-content">
+          <div class="footer-text">
+            <h4 class="footer-heading">Ищите нас в соцсетях</h4>
+            <div class="social-icons">
+              <a href="#" aria-label="Visit our Facebook page">
+                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/3db86149685a85d32ad5ed51aac12db6c0bcc8a62007889556589606dbf69353?apiKey=caeb692b74c74389932f5520891447b3&" alt="" class="social-icon" />
+              </a>
+              <a href="#" aria-label="Visit our Instagram page">
+                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/cad32208c7a9878c7db0c875b6a5df8552ab460911564f8d689bf6090fc22b35?apiKey=caeb692b74c74389932f5520891447b3&" alt="" class="social-icon" />
+              </a>
+            </div>
+          </div>
+          <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a5b181fa088d20b18930e9b5cb5ee75b563f6ad25c1f944f093678a8ef0e6813?apiKey=caeb692b74c74389932f5520891447b3&" alt="Abracadabra Conference Logo" class="footer-logo" />
+        </div>
+      </footer>
 </body>
 </html>
