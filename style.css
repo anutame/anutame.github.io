@@ -23,7 +23,7 @@
 .footer { justify-content: center; align-items: center; background-color: #f6f4ff; display: flex; margin-top: 100px; width: 100%; padding: 68px 60px; }
 .footer-content { display: flex; width: 100%; max-width: 1200px; gap: 20px; }
 .footer-text { display: flex; flex-direction: column; flex: 1; }
-.footer-heading { color: #080032; text-align: right; font: 400 18px Open Sans, sans-serif; }
+.footer-heading { color: #080032; text-align: left; font: 400 18px Open Sans, sans-serif; }
 .social-icons { display: flex; margin-top: 20px; padding-right: 80px; gap: 16px; }
 .social-icon { aspect-ratio: 1; object-fit: auto; object-position: center; width: 40px; }
 .footer-logo { aspect-ratio: 6.25; object-fit: auto; object-position: center; width: 183px; max-width: 100%; margin: auto 0; }
