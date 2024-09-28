@@ -42,6 +42,68 @@ body{
   background: #3568b5;
   overflow: hidden;
 }
+/* header */
+
+.page-header {
+  margin-bottom: 40px;
+  display: block;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  width: 1170px;
+  margin: 0 auto;
+  padding: 20px 55px;
+  
+}
+
+
+.site-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0;
+  margin-right: 40px;
+  list-style: none;
+  max-width: 990px;
+}
+
+.site-navigation-item {
+  margin-right: 30px;
+}
+
+.site-navigation-item:last-child {
+  margin-right: 0;
+}
+
+.site-navigation-item a {
+  font-size: 14px;
+  line-height: 18px;
+  color: #163152;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.site-navigation-item a:hover {
+  color: rgba(22, 49, 82, 0.5);
+}
+
+.site-navigation-item a:active {
+  color: rgba(22, 49, 82, 0.3);
+}
+/* main */
+
+.main-content {
+  width: 1170px;
+  margin: 0 auto;
+  padding: 0 55px;
+}
+
 
 .📺{
   width: 500px;
