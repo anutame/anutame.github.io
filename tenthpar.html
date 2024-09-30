@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Хиллер Миша удаляет аппендицит Юре</title>
+  <link rel="stylesheet" href="./style10.css">
+
+</head>
+<body>
+  <header class="page-header">
+    
+    <nav class="main-nav">
+     
+      <ul class="site-navigation">
+        <li class="site-navigation-item">
+          <a href="index.html">Первый</a>
+        </li>
+        <li class="site-navigation-item">
+          <a href="secondpar.html">Второй</a>
+        </li>
+        <li class="site-navigation-item">
+          <a href="thirdpar.html">Третий</a>
+        </li>
+        <li class="site-navigation-item">
+          <a href="fourthpar.html">Четвертый</a>
+        </li>
+        <li class="site-navigation-item">
+          <a href="fifthpar.html">Пятый</a>
+        </li>
+        <li class="site-navigation-item">
+          <a href="sixthpar.html">Шестой</a>
+        </li>
+        <li class="site-navigation-item">
+          <a href="seventhpar.html">Седьмой</a>
+        </li>
+        <li class="site-navigation-item">
+          <a href="eighthpar.html">Восьмой</a>
+        </li>
+        <li class="site-navigation-item">
+            <a href="ninthpar.html">Девятый</a>
+        </li>
+        <li class="site-navigation-item">
+          <a href="tenthpar.html">Десятый</a>
+      </li>
+      </ul>
+      
+    </nav>
+  </header>
+  <main>
+    <div class="cards">
+        <h3>Parallax</h3>
+        <h1>Висковатовы</h1>
+        <div class="card card__one">
+          <div class="card__bg"></div>
+          <img class="card__img" src="img/egv-no-bg-preview (carve.photos) (1).png" />
+          <div class="card__text">
+            <p class="card__title">Мария Генриховна</p>
+          </div>
+        </div>
+        <div class="card card__two">
+          <div class="card__bg"></div>
+          <img class="card__img" src="img/olv-no-bg2.png" />
+          <div class="card__text">
+            <p class="card__title">Ольга Львовна</p>
+          </div>
+        </div>
+        <div class="card card__three">
+          <div class="card__bg"></div>
+          <img class="card__img" src="img/pav-no-bg2.png" />
+          <div class="card__text">
+            <p class="card__title">Павел Александрович</p>
+          </div>
+        </div>
+      </div>
+      
+      
+  </main>
+  <script>
+        const cards = document.querySelector(".cards");
+        const images = document.querySelectorAll(".card__img");
+        const backgrounds = document.querySelectorAll(".card__bg");
+        const range = 40;
+
+        // const calcValue = (a, b) => (((a * 100) / b) * (range / 100) -(range / 2)).toFixed(1);
+        const calcValue = (a, b) => (a/b*range-range/2).toFixed(1) // thanks @alice-mx
+
+        let timeout;
+        document.addEventListener('mousemove', ({x, y}) => {
+        if (timeout) {
+            window.cancelAnimationFrame(timeout);
+        }
+            
+        timeout = window.requestAnimationFrame(() => {
+            const yValue = calcValue(y, window.innerHeight);
+            const xValue = calcValue(x, window.innerWidth);
+
+            cards.style.transform = `rotateX(${yValue}deg) rotateY(${xValue}deg)`;
+
+            [].forEach.call(images, (image) => {
+            image.style.transform = `translateX(${-xValue}px) translateY(${yValue}px)`;
+            });
+
+            [].forEach.call(backgrounds, (background) => {
+            background.style.backgroundPosition = `${xValue*.45}px ${-yValue*.45}px`;
+            })
+            })
+        }, false);
+  </script>
+</body>
+</html>

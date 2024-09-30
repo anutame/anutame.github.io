@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Хиллер Миша удаляет аппендицит Юре</title>
-  <link rel="stylesheet" href="./style3.css">
+  <link rel="stylesheet" href="./style9.css">
 
 </head>
 <body>
@@ -40,27 +40,35 @@
             <a href="ninthpar.html">Девятый</a>
         </li>
         <li class="site-navigation-item">
-          <a href="tenthpar.html">Десятый</a>
-      </li>
+            <a href="tenthpar.html">Десятый</a>
+        </li>
       </ul>
       
     </nav>
   </header>
   <main>
-    
-<!-- the type of image is important for the illusion 
-   use an image having the main element in the center and a uniform background
--->
-   <section class="row original">
-        <img src="img/669-300x300.jpg" alt="the back of random person">
-        <img src="img/pexels-pixabay-62655.jpg" alt="an eagle" style="--f:.12;--r:5px">
-        <img src="img/326-300x300.jpg" alt="a cup of something to drink, probably some tea" style="--f:.08;--r:20px">   
-    </section>
-    <section class="row example">
-        <img src="img/div-min.jpg" alt="the back of random person">
-        <img src="img/egv-min.jpg" alt="an eagle" style="--f:.12;--r:5px">
-        <img src="img/pvv3-min.jpg" alt="a cup of something to drink, probably some tea" style="--f:.08;--r:20px">
-    </section>
+    <div id="parallax"><h1>time<br/>history<br/>family</h1></div>
+   
   </main>
+  <script>
+        (function() {
+            // Add event listener
+            document.addEventListener("mousemove", parallax);
+            const elem = document.querySelector("#parallax");
+            // Magic happens here
+            function parallax(e) {
+                let _w = window.innerWidth/2;
+                let _h = window.innerHeight/2;
+                let _mouseX = e.clientX;
+                let _mouseY = e.clientY;
+                let _depth1 = `${50 - (_mouseX - _w) * 0.01}% ${50 - (_mouseY - _h) * 0.01}%`;
+                let _depth2 = `${50 - (_mouseX - _w) * 0.02}% ${50 - (_mouseY - _h) * 0.02}%`;
+                let _depth3 = `${50 - (_mouseX - _w) * 0.06}% ${50 - (_mouseY - _h) * 0.06}%`;
+                let x = `${_depth3}, ${_depth2}, ${_depth1}`;
+                console.log(x);
+                elem.style.backgroundPosition = x;
+            }
+        })();
+  </script>
 </body>
 </html>
