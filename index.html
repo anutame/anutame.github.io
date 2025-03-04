@@ -1,74 +1,289 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Хиллер Миша удаляет аппендицит Юре</title>
-  <link rel="stylesheet" href="./style.css">
-
+  <title>Висковатовы</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="vendor/react.development.js"></script>
+  <script src="vendor/react-dom.development.js"></script>
+  <script src="vendor/babel.min.js"></script>
+  <script src="vendor/get-declension.min.umd.js"></script>
+  <script src="data.js"></script>
 </head>
 <body>
-  <header class="page-header">
-    
-    <nav class="main-nav">
-     
-      <ul class="site-navigation">
-        <li class="site-navigation-item">
-          <a href="index.html">Первый</a>
-        </li>
-        <li class="site-navigation-item">
-          <a href="secondpar.html">Второй</a>
-        </li>
-        <li class="site-navigation-item">
-          <a href="thirdpar.html">Третий</a>
-        </li>
-        <li class="site-navigation-item">
-          <a href="fourthpar.html">Четвертый</a>
-        </li>
-        <li class="site-navigation-item">
-          <a href="fifthpar.html">Пятый</a>
-        </li>
-        <li class="site-navigation-item">
-          <a href="sixthpar.html">Шестой</a>
-        </li>
-        <li class="site-navigation-item">
-          <a href="seventhpar.html">Седьмой</a>
-        </li>
-        <li class="site-navigation-item">
-          <a href="eighthpar.html">Восьмой</a>
-        </li>
-        <li class="site-navigation-item">
-            <a href="ninthpar.html">Девятый</a>
-        </li>
-        <li class="site-navigation-item">
-          <a href="tenthpar.html">Десятый</a>
-      </li>
-      </ul>
-      
-    </nav>
-  </header>
-  <main>
-    <ul class="prlx">
-      <li>
-        <div class="📺">
-          <div class="🍌"></div>
-          <div class="🍦"></div> 
-          <div class="🍇"></div>
-          <button class="🆗"></button>
-        </div>
-      </li>
-      <li>
-        <div class="container">
-          <section class="intro"></section>
+  <div id="root"></div>
+  <script type="text/babel">
+    // Хук для отслеживания активной карточки
+    function useActiveCard(person) {
+      const [activeCardId, setActiveCardId] = React.useState(null);
 
-            <div class="meta">
-              <div class="meta__inner">
-                <h3>Александр Васильевич Висковатов</h3>
-                <p> Известный военный историк. Родился в старинной дворянской семье, которую основал князь Михаил Дмитриевич Мещерский по прозвищу Висковатый. Александр был единственным ребёнком Шарлоты и Василия Висковатовых <a href="#">read more ...</a></p>
-              </div>
-            </div>
+      React.useEffect(() => {
+        const cards = document.querySelectorAll('.card');
+        const observerOptions = {
+          root: document.querySelector('.lineoflife'),
+          rootMargin: '0px',
+          threshold: 0.5, // Карточка считается активной, если 50% её видно
+        };
+
+        const observerCallback = (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveCardId(entry.target.dataset.id); // Устанавливаем активную карточку
+            }
+          });
+        };
+
+        const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+        cards.forEach((card) => {
+          observer.observe(card);
+        });
+
+        // Очистка при размонтировании компонента
+        return () => {
+          cards.forEach((card) => {
+            observer.unobserve(card);
+          });
+        };
+      }, [person]); // Зависимость от массива person
+
+      return activeCardId;
+    }
+
+    // Хук для синхронизации прокрутки lineoflife и timeline
+    function useSyncScroll(years) {
+      React.useEffect(() => {
+        const lineoflife = document.querySelector('.lineoflife');
+        const timeline = document.querySelector('.timeline');
+
+        const handleScroll = () => {
+          // Высота всей секции lineoflife
+          const lineoflifeHeight = lineoflife.scrollHeight - lineoflife.clientHeight;
+          // Текущая позиция прокрутки lineoflife
+          const scrollTop = lineoflife.scrollTop;
+
+          // Находим индекс текущего года на основе позиции прокрутки
+          const yearIndex = Math.floor((scrollTop / lineoflifeHeight) * (years.length - 1));
+          const currentYear = years[yearIndex];
+
+          // Находим соответствующий год в timeline
+          const timelineEvent = timeline.querySelector(`[data-year="${currentYear}"]`);
+          if (timelineEvent) {
+            // Прокручиваем timeline до соответствующего года
+            const timelineScrollTop = timelineEvent.offsetTop - timeline.offsetTop;
+            timeline.scrollTop = timelineScrollTop;
+          }
+        };
+
+        // Добавляем обработчик события прокрутки
+        lineoflife.addEventListener('scroll', handleScroll);
+
+        // Убираем обработчик при размонтировании компонента
+        return () => {
+          lineoflife.removeEventListener('scroll', handleScroll);
+        };
+      }, [years]); // Зависимость от массива years
+    }
+
+    function parseDate(dateText) {
+  // Если дата указана только как год (например, "1857")
+  if (/^\d{4}$/.test(dateText)) {
+    return new Date(parseInt(dateText, 10), 0, 1); // 1 января указанного года
+  }
+
+  // Если дата в формате "YYYY-MM-DD"
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
+    return new Date(dateText);
+  }
+
+  // Если дата в формате "DD.MM.YYYY"
+  if (/^\d{2}\.\d{2}\.\d{4}$/.test(dateText)) {
+    const [day, month, year] = dateText.split('.');
+    return new Date(`${year}-${month}-${day}`);
+  }
+
+  // Если формат неизвестен, выбрасываем ошибку
+  throw new Error(`Неизвестный формат даты: ${dateText}`);
+}
+
+function useSyncTimelineScroll(activeCardId, timeline) {
+  React.useEffect(() => {
+    if (!activeCardId) return; // Если активной карточки нет, ничего не делаем
+
+    // Находим активную карточку в lineoflife
+    const activeCard = document.querySelector(`.card[data-id="${activeCardId}"]`);
+    if (!activeCard) return;
+
+    // Получаем текст даты из карточки
+    const dateText = activeCard.querySelector('.date').textContent;
+
+    if (!dateText) return;
+
+    // Парсим дату с учетом возможных форматов
+    let activeCardYear;
+    try {
+      const date = parseDate(dateText);
+      activeCardYear = date.getFullYear();
+    } catch (error) {
+      return;
+    }
+
+    // Находим соответствующее событие в timeline
+    const timelineEvent = document.querySelector(`.timeline-event[data-year="${activeCardYear}"]`);
+    if (!timelineEvent) return;
+
+    const timeline = document.querySelector('.timeline');
+    const activeCardTop = activeCard.offsetTop; // Позиция активной карточки
+    const timelineEventTop = timelineEvent.offsetTop; // Позиция события в timeline
+
+    // Прокручиваем timeline до соответствующего года
+    timeline.scrollTop = timelineEventTop - activeCardTop + timeline.scrollTop;
+  }, [activeCardId, timeline]); // Зависимость от activeCardId и timeline
+}
+
+    // Компонент для отображения одной карточки
+    function Event({ id, date, age, title, description, isActive, url, openModal }) {
+  return (
+    <li className={`card ${isActive ? 'active' : ''}`} data-id={id}>
+      <section className="age">{age}</section>
+      <section className="information">
+        <p className="date">{date}</p>
+        <h2>{title}</h2>
+        <p className="description">{description}</p>
+        {/* Иконка документа */}
+        <div className="doc-icon" onClick={() => openModal(url)}>
+          <img src="img/doc-ico.png" alt="Document Icon" />
         </div>
-      </li>
-    </ul>
-</main>
+      </section>
+    </li>
+  );
+}
+
+    // Компонент для отображения списка карточек
+    function CardList({ person, activeCardId, openModal }) {
+  const cards = person.map((item) => (
+    <Event
+      key={item.id}
+      id={item.id}
+      date={item.date}
+      age={item.age}
+      title={item.title}
+      description={item.full_descr}
+      isActive={activeCardId === item.id}
+      url={item.url} // Передаем URL изображения
+      openModal={openModal} // Передаем функцию открытия модального окна
+    />
+  ));
+
+  return <ul className="cards">{cards}</ul>;
+}
+
+    // Компонент для отображения одного исторического события
+    function TimelineEvent({ year, russianHistory, worldHistory }) {
+      return (
+        <li className="timeline-event" data-year={year}>
+          <h3>{year}</h3>
+          <p><strong>Россия:</strong> {russianHistory}</p>
+          <p><strong>Мир:</strong> {worldHistory}</p>
+        </li>
+      );
+    }
+
+    // Компонент для отображения списка исторических событий
+    function TimelineList({ timeline }) {
+      const timelineEvents = timeline.map((event) => (
+        <TimelineEvent
+          key={event.id}
+          year={event.id}
+          russianHistory={event.russianhistory}
+          worldHistory={event.worldhistory}
+        />
+      ));
+
+      return <ul className="timeline-events">{timelineEvents}</ul>;
+    }
+
+    // Основной компонент App
+    function App({ person = [], timeline = [] }) {
+  const [activeCardId, setActiveCardId] = React.useState(null);
+  const [modalImageUrl, setModalImageUrl] = React.useState(null); // Состояние для модального окна
+  const [storyImage, setStoryImage] = React.useState(null); // Состояние для изображения в поле story
+  const [isStoryImageVisible, setIsStoryImageVisible] = React.useState(false); // Состояние для видимости изображения
+
+  // Функция для открытия модального окна
+  const openModal = (url) => {
+    setModalImageUrl(url);
+  };
+
+  // Функция для закрытия модального окна
+  const closeModal = () => {
+    setModalImageUrl(null);
+  };
+
+  // Используем хук для отслеживания активной карточки
+  const activeCardIdFromHook = useActiveCard(person);
+
+  // Синхронизируем состояние activeCardId с результатом хука
+  React.useEffect(() => {
+    setActiveCardId(activeCardIdFromHook);
+  }, [activeCardIdFromHook]);
+
+  // Обновляем изображение в поле story при изменении активной карточки
+  React.useEffect(() => {
+    if (activeCardId) {
+      const activeCard = person.find((item) => item.id === activeCardId);
+      if (activeCard && activeCard.storyImage) {
+        setStoryImage(activeCard.storyImage); // Устанавливаем изображение для поля story
+        setIsStoryImageVisible(true); // Показываем изображение
+      } else {
+        setIsStoryImageVisible(false); // Скрываем изображение
+      }
+    } else {
+      setIsStoryImageVisible(false); // Скрываем изображение
+    }
+  }, [activeCardId, person]);
+
+  // Синхронизация прокрутки timeline
+  const years = [...new Set(person.map(event => new Date(event.date).getFullYear()))];
+  useSyncScroll(years);
+  useSyncTimelineScroll(activeCardId, timeline);
+
+  return (
+    <section className="fieldforperson">
+      <section className="story">
+        {/* Отображаем изображение в поле story, если оно есть */}
+        {storyImage && (
+          <img
+            src={storyImage}
+            alt="Story"
+            className={`story-image ${isStoryImageVisible ? 'visible' : ''}`}
+          />
+        )}
+      </section>
+      <section className="lineoflife">
+        <CardList person={person} activeCardId={activeCardId} openModal={openModal} />
+      </section>
+      <section className="timeline">
+        <TimelineList timeline={timeline} />
+      </section>
+
+      {/* Модальное окно */}
+      {modalImageUrl && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="close-modal" onClick={closeModal}>×</button>
+            <img src={modalImageUrl} alt="Document" />
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+    // Рендеринг приложения
+    const container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<App person={KAV} timeline={worldAndRussianTimeline} />);
+  </script>
 </body>
 </html>

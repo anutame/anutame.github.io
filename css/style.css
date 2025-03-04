@@ -1,0 +1,280 @@
+:root {
+  --animation-duration: 0.8s;
+}
+
+@font-face {
+  font-family: "Nunito";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/Nunito-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Nunito";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/Nunito-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Nunito";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("../fonts/Nunito-Black.woff2") format("woff2");
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", sans-serif;
+  font-size: 20px;
+  line-height: 28px;
+  color: white;
+  background: black;
+}
+
+.fieldforperson {
+    display: flex; /* Используем Flexbox для разделения на три части */
+    height: 100vh; /* Занимаем всю высоту экрана */
+  }
+  
+  .story {
+    flex: 2; /* Занимает 2 части из 3 */
+    background-color: #f9f9f9; /* Цвет фона для инфографики */
+    padding: 20px; /* Внутренний отступ */
+  }
+  
+  .lineoflife {
+    flex: 1; /* Занимает 1 часть из 3 */
+    background-color: #e9e9e9; /* Цвет фона для списка карточек */
+    padding: 20px; /* Внутренний отступ */
+    overflow-y: auto; /* Добавляем скролл, если карточек много */
+  }
+            /* Стилизация скроллбара для WebKit-браузеров */
+            .lineoflife::-webkit-scrollbar {
+                width: 6px; /* Ширина скроллбара */
+            }
+            
+            .lineoflife::-webkit-scrollbar-track {
+                background: #f1f1f1; /* Цвет трека */
+                border-radius: 3px; /* Скругление углов трека */
+            }
+            
+            .lineoflife::-webkit-scrollbar-thumb {
+                background: #888; /* Цвет ползунка */
+                border-radius: 3px; /* Скругление углов ползунка */
+            }
+            
+            .lineoflife::-webkit-scrollbar-thumb:hover {
+                background: #555; /* Цвет ползунка при наведении */
+            }
+  
+  .timeline {
+    width: 200px; /* Фиксированная ширина */
+    background-color: #d9d9d9; /* Цвет фона для навигатора времени */
+    padding: 20px; /* Внутренний отступ */
+    overflow-y: hidden; /* Добавляем скролл */
+    scroll-behavior: smooth; /* Плавная прокрутка */
+  }
+  
+  .timeline-events {
+    list-style: none; /* Убираем маркеры списка */
+    padding: 0; /* Убираем отступы у списка */
+    margin: 0; /* Убираем внешние отступы */
+  }
+  
+  .timeline-event {
+    margin-bottom: 20px; /* Отступ между событиями */
+    padding: 10px;
+    background-color: white; /* Цвет фона события */
+    border-radius: 5px; /* Скругленные углы */
+  }
+  
+  .timeline-event h3 {
+    font-size: 18px; /* Размер заголовка года */
+    margin-bottom: 10px; /* Отступ снизу */
+    color: #333;
+  }
+  
+  .timeline-event p {
+    font-size: 14px; /* Размер текста события */
+    color: #666; /* Цвет текста события */
+    margin-bottom: 5px; /* Отступ снизу */
+  }
+  
+  .cards {
+    list-style: none; /* Убираем маркеры списка */
+    padding: 0; /* Убираем отступы у списка */
+    margin: 0; /* Убираем внешние отступы */
+  }
+
+
+  .card {
+    display: flex;
+    align-items: center; /* Выравнивание по вертикали */
+    background-color: none; /* Цвет фона карточки */
+    margin-bottom: 20px; /* Отступ между карточками */
+    position: relative; /* Для позиционирования псевдоэлемента */
+    padding-left: 40px; /* Отступ слева, чтобы линия не накладывалась на бусину */
+  }
+  
+  .age {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px; /* Ширина круга */
+    height: 60px; /* Высота круга */
+    color: black;
+    background-color: white; /* Цвет круга */
+    border-radius: 50%; /* Делаем круг */
+    font-size: 18px; /* Размер текста */
+    font-weight: bold; /* Жирный текст */
+    margin-right: 20px; /* Отступ между кругом и информацией */
+    position: relative; /* Для позиционирования линии */
+    z-index: 1; /* Чтобы бусина была над линией */
+  }
+        .card.active .age {
+            border: 3px solid #ff5722; /* Контрастная обводка для бусины */
+        }
+        
+        .card.active .information {
+            border: 3px solid #ff5722; /* Контрастная обводка для информации */
+            box-shadow: 0 0 10px rgba(255, 87, 34, 0.5); /* Тень для выделения */
+        }  
+  /* Вертикальная линия (нить) между бусинами */
+  .card:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 50%; /* Начинается от центра текущей бусины */
+    left: 67px; /* Центрируем линию относительно бусины (40px padding + 10px половина ширины бусины) */
+    transform: translateY(-50%); /* Смещаем линию вверх на половину ее высоты */
+    width: 5px; /* Ширина линии */
+    height: calc(100% + 20px); /* Высота линии (на всю высоту карточки, включая отступ) */
+    background-color: #4d4d4d; /* Цвет линии */
+    z-index: 0; /* Линия под бусиной */
+  }
+  
+  /* Первая карточка: линия начинается от центра бусины */
+  .card:first-child::after {
+    top: 100%; /* Начинается от центра первой бусины */
+  }
+  
+/* Последняя карточка: добавляем отдельную линию под последней бусиной */
+.card:last-child::before {
+    content: '';
+    position: absolute;
+    top: -20px; /* Начинается от центра последней бусины */
+    left: 70px; /* Центрируем линию относительно бусины */
+    transform: translateX(-50%); /* Точное центрирование */
+    width: 5px; /* Ширина линии */
+    height: 50%; /* Линия заканчивается под последней бусиной */
+    background-color: #4d4d4d; /* Цвет линии */
+    z-index: 0; /* Линия под бусиной */
+  }       
+          
+  .information {
+    flex: 1; /* Занимает оставшееся пространство */
+    background-color: white; /* Цвет фона информации */
+    padding: 15px; /* Внутренний отступ */
+    border-radius: 10px; /* Скругленные углы */
+  }
+  
+  .date {
+    font-size: 14px; /* Размер текста даты */
+    color: #666; /* Цвет текста даты */
+    margin-bottom: 10px; /* Отступ снизу */
+  }
+  
+  h2 {
+    font-size: 20px; /* Размер заголовка */
+    margin-bottom: 10px; /* Отступ снизу */
+    color: #333;
+  }
+  
+  .description {
+    font-size: 16px; /* Размер текста описания */
+    color: #333; /* Цвет текста описания */
+  }
+
+  /* Стили для модального окна */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: auto;
+  }
+  
+  .modal-content img {
+    max-width: 100%;
+    max-height: 80vh;
+    display: block;
+    margin: 0 auto;
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+  }
+  
+  .close-modal:hover {
+    color: #000;
+  }
+  
+  /* Стили для иконки документа */
+  .doc-icon {
+    cursor: pointer;
+    margin-top: 10px;
+    text-align: right;
+  }
+  
+  .doc-icon img {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Стили для поля story */
+.story {
+    flex: 2; /* Занимает 2 части из 3 */
+    background-color: #f9f9f9; /* Цвет фона для инфографики */
+    padding: 20px; /* Внутренний отступ */
+    position: relative; /* Для позиционирования изображения */
+    overflow: hidden; /* Чтобы изображение не выходило за пределы */
+  }
+  
+  .story-image {
+    width: 100%; /* Изображение занимает всю ширину поля */
+    height: auto; /* Сохраняем пропорции */
+    opacity: 0; /* Начальная прозрачность */
+    transition: opacity 0.5s ease-in-out; /* Плавное появление */
+    position: absolute; /* Позиционируем абсолютно */
+    top: 0;
+    left: 0;
+  }
+  
+  .story-image.visible {
+    opacity: 1; /* Видимое состояние */
+  }
