@@ -15,168 +15,126 @@
   <script type="text/babel">
     // Хук для отслеживания активной карточки
     function useActiveCard(person) {
-      const [activeCardId, setActiveCardId] = React.useState(null);
+      const [activeCardId, setActiveCardId] = React.useState(person[0]?.id || null);
 
-      React.useEffect(() => {
+      const handleScroll = () => {
         const cards = document.querySelectorAll('.card');
-        const observerOptions = {
-          root: document.querySelector('.lineoflife'),
-          rootMargin: '0px',
-          threshold: 0.5, // Карточка считается активной, если 50% её видно
-        };
-
-        const observerCallback = (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setActiveCardId(entry.target.dataset.id); // Устанавливаем активную карточку
-            }
-          });
-        };
-
-        const observer = new IntersectionObserver(observerCallback, observerOptions);
+        const lineoflife = document.querySelector('.lineoflife');
+        let closestCard = null;
+        let closestDistance = Infinity;
 
         cards.forEach((card) => {
-          observer.observe(card);
+          const cardRect = card.getBoundingClientRect();
+          const lineoflifeRect = lineoflife.getBoundingClientRect();
+          const distance = cardRect.top - lineoflifeRect.top;
+
+          if (distance >= 0 && distance < closestDistance) {
+            closestDistance = distance;
+            closestCard = card;
+          }
         });
 
-        // Очистка при размонтировании компонента
+        if (closestCard) {
+          setActiveCardId(closestCard.dataset.id);
+        }
+      };
+
+      const handleCardClick = (card) => {
+        setActiveCardId(card.dataset.id);
+      };
+
+      React.useEffect(() => {
+        const lineoflife = document.querySelector('.lineoflife');
+        const cards = document.querySelectorAll('.card');
+
+        lineoflife.addEventListener('scroll', handleScroll);
+        cards.forEach((card) => {
+          card.addEventListener('click', () => handleCardClick(card));
+        });
+
+        handleScroll(); // Устанавливаем первую карточку активной при загрузке
+
         return () => {
+          lineoflife.removeEventListener('scroll', handleScroll);
           cards.forEach((card) => {
-            observer.unobserve(card);
+            card.removeEventListener('click', () => handleCardClick(card));
           });
         };
-      }, [person]); // Зависимость от массива person
+      }, [person]);
 
       return activeCardId;
     }
 
     // Хук для синхронизации прокрутки lineoflife и timeline
-    function useSyncScroll(years) {
+    function useSyncScroll(person) {
       React.useEffect(() => {
         const lineoflife = document.querySelector('.lineoflife');
         const timeline = document.querySelector('.timeline');
 
+        if (!lineoflife || !timeline) return; // Проверяем, существуют ли элементы
+
         const handleScroll = () => {
-          // Высота всей секции lineoflife
-          const lineoflifeHeight = lineoflife.scrollHeight - lineoflife.clientHeight;
-          // Текущая позиция прокрутки lineoflife
-          const scrollTop = lineoflife.scrollTop;
+          const cards = Array.from(document.querySelectorAll('.lineoflife .card'));
+          const visibleCard = cards.find((card) => {
+            const rect = card.getBoundingClientRect();
+            return rect.top >= 0 && rect.bottom <= window.innerHeight;
+          });
 
-          // Находим индекс текущего года на основе позиции прокрутки
-          const yearIndex = Math.floor((scrollTop / lineoflifeHeight) * (years.length - 1));
-          const currentYear = years[yearIndex];
+          if (visibleCard) {
+            const dateText = visibleCard.querySelector('.date').textContent;
+            const cardDate = new Date(dateText);
+            const cardYear = cardDate.getFullYear();
 
-          // Находим соответствующий год в timeline
-          const timelineEvent = timeline.querySelector(`[data-year="${currentYear}"]`);
-          if (timelineEvent) {
-            // Прокручиваем timeline до соответствующего года
-            const timelineScrollTop = timelineEvent.offsetTop - timeline.offsetTop;
-            timeline.scrollTop = timelineScrollTop;
+            const timelineEvent = timeline.querySelector(`[data-year="${cardYear}"]`);
+            if (timelineEvent) {
+              timelineEvent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
           }
         };
 
-        // Добавляем обработчик события прокрутки
         lineoflife.addEventListener('scroll', handleScroll);
 
-        // Убираем обработчик при размонтировании компонента
         return () => {
           lineoflife.removeEventListener('scroll', handleScroll);
         };
-      }, [years]); // Зависимость от массива years
+      }, [person]);
     }
-
-    function parseDate(dateText) {
-  // Если дата указана только как год (например, "1857")
-  if (/^\d{4}$/.test(dateText)) {
-    return new Date(parseInt(dateText, 10), 0, 1); // 1 января указанного года
-  }
-
-  // Если дата в формате "YYYY-MM-DD"
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
-    return new Date(dateText);
-  }
-
-  // Если дата в формате "DD.MM.YYYY"
-  if (/^\d{2}\.\d{2}\.\d{4}$/.test(dateText)) {
-    const [day, month, year] = dateText.split('.');
-    return new Date(`${year}-${month}-${day}`);
-  }
-
-  // Если формат неизвестен, выбрасываем ошибку
-  throw new Error(`Неизвестный формат даты: ${dateText}`);
-}
-
-function useSyncTimelineScroll(activeCardId, timeline) {
-  React.useEffect(() => {
-    if (!activeCardId) return; // Если активной карточки нет, ничего не делаем
-
-    // Находим активную карточку в lineoflife
-    const activeCard = document.querySelector(`.card[data-id="${activeCardId}"]`);
-    if (!activeCard) return;
-
-    // Получаем текст даты из карточки
-    const dateText = activeCard.querySelector('.date').textContent;
-
-    if (!dateText) return;
-
-    // Парсим дату с учетом возможных форматов
-    let activeCardYear;
-    try {
-      const date = parseDate(dateText);
-      activeCardYear = date.getFullYear();
-    } catch (error) {
-      return;
-    }
-
-    // Находим соответствующее событие в timeline
-    const timelineEvent = document.querySelector(`.timeline-event[data-year="${activeCardYear}"]`);
-    if (!timelineEvent) return;
-
-    const timeline = document.querySelector('.timeline');
-    const activeCardTop = activeCard.offsetTop; // Позиция активной карточки
-    const timelineEventTop = timelineEvent.offsetTop; // Позиция события в timeline
-
-    // Прокручиваем timeline до соответствующего года
-    timeline.scrollTop = timelineEventTop - activeCardTop + timeline.scrollTop;
-  }, [activeCardId, timeline]); // Зависимость от activeCardId и timeline
-}
 
     // Компонент для отображения одной карточки
     function Event({ id, date, age, title, description, isActive, url, openModal }) {
-  return (
-    <li className={`card ${isActive ? 'active' : ''}`} data-id={id}>
-      <section className="age">{age}</section>
-      <section className="information">
-        <p className="date">{date}</p>
-        <h2>{title}</h2>
-        <p className="description">{description}</p>
-        {/* Иконка документа */}
-        <div className="doc-icon" onClick={() => openModal(url)}>
-          <img src="img/doc-ico.png" alt="Document Icon" />
-        </div>
-      </section>
-    </li>
-  );
-}
+      return (
+        <li className={`card ${isActive ? 'active' : ''}`} data-id={id}>
+          <section className="age">{age}</section>
+          <section className="information">
+            <p className="date">{date}</p>
+            <h2>{title}</h2>
+            <p className="description">{description}</p>
+            <div className="doc-icon" onClick={() => openModal(url, 'document')}>
+              <img src="img/doc-ico.png" alt="Document Icon" />
+            </div>
+          </section>
+        </li>
+      );
+    }
 
     // Компонент для отображения списка карточек
     function CardList({ person, activeCardId, openModal }) {
-  const cards = person.map((item) => (
-    <Event
-      key={item.id}
-      id={item.id}
-      date={item.date}
-      age={item.age}
-      title={item.title}
-      description={item.full_descr}
-      isActive={activeCardId === item.id}
-      url={item.url} // Передаем URL изображения
-      openModal={openModal} // Передаем функцию открытия модального окна
-    />
-  ));
+      const cards = person.map((item) => (
+        <Event
+          key={item.id}
+          id={item.id}
+          date={item.date}
+          age={item.age}
+          title={item.title}
+          description={item.full_descr}
+          isActive={activeCardId === item.id}
+          url={item.url}
+          openModal={openModal}
+        />
+      ));
 
-  return <ul className="cards">{cards}</ul>;
-}
+      return <ul className="cards">{cards}</ul>;
+    }
 
     // Компонент для отображения одного исторического события
     function TimelineEvent({ year, russianHistory, worldHistory }) {
@@ -203,62 +161,490 @@ function useSyncTimelineScroll(activeCardId, timeline) {
       return <ul className="timeline-events">{timelineEvents}</ul>;
     }
 
-    // Основной компонент App
-    function App({ person = [], timeline = [] }) {
-  const [activeCardId, setActiveCardId] = React.useState(null);
-  const [modalImageUrl, setModalImageUrl] = React.useState(null); // Состояние для модального окна
-  const [storyImage, setStoryImage] = React.useState(null); // Состояние для изображения в поле story
-  const [isStoryImageVisible, setIsStoryImageVisible] = React.useState(false); // Состояние для видимости изображения
+    function Medals({ openModal, activeCardId, person }) {
+  const [activeMedals, setActiveMedals] = React.useState([]);
 
-  // Функция для открытия модального окна
-  const openModal = (url) => {
-    setModalImageUrl(url);
-  };
-
-  // Функция для закрытия модального окна
-  const closeModal = () => {
-    setModalImageUrl(null);
-  };
-
-  // Используем хук для отслеживания активной карточки
-  const activeCardIdFromHook = useActiveCard(person);
-
-  // Синхронизируем состояние activeCardId с результатом хука
   React.useEffect(() => {
-    setActiveCardId(activeCardIdFromHook);
-  }, [activeCardIdFromHook]);
+    if (!activeCardId || !person) {
+      // Если activeCardId или person не определены, сбрасываем медали
+      setActiveMedals([]);
+      return;
+    }
 
-  // Обновляем изображение в поле story при изменении активной карточки
+    // Находим активную карточку
+    const activeCard = person.find((item) => item.id === activeCardId);
+    if (!activeCard) {
+      // Если карточка не найдена, сбрасываем медали
+      setActiveMedals([]);
+      return;
+    }
+
+    // Собираем все карточки до текущей
+    const previousCards = person.slice(0, person.indexOf(activeCard) + 1);
+
+    // Собираем все медали, которые были вручены до текущей карточки
+    const allMedals = previousCards
+      .flatMap((card) => {
+        if (card.medals) {
+          return card.medals
+            .split(',')
+            .map((id) => medalsData.find((medal) => medal.id === parseInt(id.trim(), 10)))
+            .filter(Boolean);
+        }
+        return [];
+      });
+
+    // Убираем дубликаты
+    const uniqueMedals = allMedals.filter(
+      (medal, index, self) => self.findIndex((m) => m.id === medal.id) === index
+    );
+
+    // Устанавливаем активные медали
+    setActiveMedals(uniqueMedals);
+  }, [activeCardId, person]);
+
+  return (
+    <div className="medals">
+      {activeMedals.length > 0 ? (
+        activeMedals.map((medal) => (
+          <div key={medal.id} className="medal-card" onClick={() => openModal(medal, 'medal')}>
+            <img src={medal.image} alt={medal.name} className="medal-image" />
+            <p className="medal-name">{medal.name}</p>
+          </div>
+        ))
+      ) : (
+        // Показываем заглушку, если медалей нет
+        <div className="medals-placeholder">
+          <p>Наград пока нет</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Status({ openModal, activeCardId, person }) {
+  const [rank, setRank] = React.useState(null);
+
   React.useEffect(() => {
-    if (activeCardId) {
-      const activeCard = person.find((item) => item.id === activeCardId);
-      if (activeCard && activeCard.storyImage) {
-        setStoryImage(activeCard.storyImage); // Устанавливаем изображение для поля story
-        setIsStoryImageVisible(true); // Показываем изображение
-      } else {
-        setIsStoryImageVisible(false); // Скрываем изображение
-      }
+    if (!activeCardId || !person) return;
+
+    // Находим активную карточку
+    const activeCard = person.find((item) => item.id === activeCardId);
+    if (!activeCard || !activeCard.status) {
+      // Если на текущей карточке нет информации о чине, сбрасываем статус
+      setRank(null);
+      return;
+    }
+
+    // Находим чин в массиве ranksAndTitles по id из активной карточки
+    const foundRank = ranksAndTitles.find((rank) => rank.id === parseInt(activeCard.status, 10));
+    if (foundRank) {
+      setRank(foundRank);
     } else {
-      setIsStoryImageVisible(false); // Скрываем изображение
+      setRank(null); // Сбрасываем, если чин не найден
     }
   }, [activeCardId, person]);
 
-  // Синхронизация прокрутки timeline
-  const years = [...new Set(person.map(event => new Date(event.date).getFullYear()))];
-  useSyncScroll(years);
-  useSyncTimelineScroll(activeCardId, timeline);
+  const handleClick = () => {
+    if (rank) {
+      openModal(rank, 'status'); // Открываем модальное окно с информацией о чине
+    } else {
+      // Если чин не найден, используем запись с id: 3 из массива places
+      const placeholderInfo = places.find((place) => place.id === 3);
+      if (placeholderInfo) {
+        openModal(placeholderInfo, 'place'); // Открываем модальное окно с текстом-заглушкой
+      }
+    }
+  };
+
+  return (
+    <div className="status" onClick={handleClick}>
+      <h2>Чин/Звание</h2>
+      <p>{rank ? rank.name : "Сын потомственного дворянина"}</p>
+    </div>
+  );
+}
+
+    function formatRevenue(value) {
+      if (typeof value === "string" && value.trim().endsWith(" р.")) {
+        return value; // Если уже содержит " р.", возвращаем как есть
+      }
+      return `${value} р.`; // Добавляем " р." к значению
+    }
+
+    function Salary({ openModal, activeCardDate, person, activeCardId }) {
+      const [annualRevenue, setAnnualRevenue] = React.useState("");
+      const [lumpSumRevenue, setLumpSumRevenue] = React.useState("");
+
+      React.useEffect(() => {
+        if (!activeCardId || !person) {
+          // Если activeCardId или person не определены, сбрасываем значения
+          setAnnualRevenue("");
+          setLumpSumRevenue("");
+          return;
+        }
+
+        // Находим активную карточку в массиве KAV
+        const activeCard = person.find((item) => item.id === activeCardId);
+        if (!activeCard || !activeCard.revenue) {
+          // Если на карточке нет данных о доходах, сбрасываем значения
+          setAnnualRevenue("");
+          setLumpSumRevenue("");
+          return;
+        }
+
+        // Устанавливаем значения для ежегодного и единовременного дохода
+        setAnnualRevenue(activeCard.revenue.annually || "");
+        setLumpSumRevenue(activeCard.revenue.lumpsum || "");
+      }, [activeCardId, person]);
+
+      const handleClick = () => {
+        if (!activeCardDate) {
+          console.log("activeCardDate не определена");
+          return;
+        }
+
+        let cardDate;
+        try {
+          cardDate = new Date(activeCardDate);
+          if (isNaN(cardDate.getTime())) {
+            throw new Error("Некорректный формат даты");
+          }
+        } catch (error) {
+          console.error("Ошибка при преобразовании даты:", error);
+          return;
+        }
+
+        const moneyInfo = moneyValueHistory.find((item) => {
+          const startDate = new Date(item.dates.start);
+          const endDate = new Date(item.dates.end);
+          return cardDate >= startDate && cardDate <= endDate;
+        });
+
+        if (moneyInfo) {
+          openModal(moneyInfo, 'money');
+        } else {
+          console.log("Не найден moneyInfo для даты:", activeCardDate);
+        }
+      };
+
+      return (
+        <div className="salary">
+          <div className="salary-card" onClick={handleClick}>
+            <h3>Доходы</h3>
+            <div className="salary-item">
+              <p className="salary-label">Ежегодно:</p>
+              <p className="salary-amount">
+                {annualRevenue ? formatRevenue(annualRevenue) : "Нет данных"}
+              </p>
+            </div>
+            {lumpSumRevenue && (
+              <div className="salary-item">
+                <p className="salary-label">Награда:</p>
+                <p className="salary-amount">{formatRevenue(lumpSumRevenue)}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function findPersonById(id, tree) {
+      if (!tree) {
+        console.error("Tree is undefined");
+        return null;
+      }
+      const person = tree.find(person => person.id === id);
+      return person;
+    }
+
+
+
+    
+    function getSpritePosition(portrait) {
+      const [row, col] = portrait.split('-').map(Number);
+      const x = (col - 1) * -50;
+      const y = (row - 1) * -50;
+      return `${x}px ${y}px`;
+    }
+    function getSpritePositionLarge(portrait) {
+      const [row, col] = portrait.split('-').map(Number);
+      const x = (col - 1) * -150;
+      const y = (row - 1) * -150;
+      return `${x}px ${y}px`;
+    }
+    
+    function Family({ activeCardId, person, tree, openModal }) {
+      const [familyMembers, setFamilyMembers] = React.useState({
+        parents: [],
+        siblings: [],
+        spouses: [],
+        kids: [],
+      });
+
+      const groupFamilyMembers = (previousCards) => {
+        const groupedFamily = {
+          parents: [],
+          siblings: [],
+          spouses: [],
+          kids: [],
+        };
+
+        previousCards.forEach((card) => {
+          if (card.family) {
+            card.family.forEach((member) => {
+              const personInfo = tree.find((p) => p.id === member.id);
+              if (personInfo) {
+                const memberWithStatus = { ...personInfo, status: member.status };
+                const existingMemberIndex = groupedFamily[member.type].findIndex(
+                  (m) => m.id === member.id
+                );
+
+                if (existingMemberIndex !== -1) {
+                  groupedFamily[member.type][existingMemberIndex] = memberWithStatus;
+                } else {
+                  groupedFamily[member.type].push(memberWithStatus);
+                }
+              }
+            });
+          }
+        });
+
+        return groupedFamily;
+      };
+
+      React.useEffect(() => {
+        if (!activeCardId || !person) return;
+
+        const activeCardIndex = person.findIndex((item) => item.id === activeCardId);
+        if (activeCardIndex === -1) return;
+
+        const previousCards = person.slice(0, activeCardIndex + 1);
+        const groupedFamily = groupFamilyMembers(previousCards);
+        setFamilyMembers(groupedFamily);
+      }, [activeCardId, person, tree]);
+
+      const renderFamilyRow = (title, members, currentPersonId) => {
+        return (
+          <div className="family-row">
+            <h2>{title}</h2>
+            <div className="icons">
+              {members.map((member, index) => (
+                <div
+                  key={index}
+                  className={`family-icon ${member.status === "dead" ? "dead" : ""} ${
+                    member.status === "divorce" ? "divorced" : ""
+                  } ${member.id === currentPersonId ? "highlighted" : ""}`}
+                  style={{ backgroundPosition: getSpritePosition(member.portrait) }}
+                  title={`${member.name} ${member.surname}`}
+                  onClick={() => openModal(member, 'family')}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      };
+
+      return (
+        <div className="family">
+          {renderFamilyRow("Родители", familyMembers.parents, "G4M-5AVV-KAV")}
+          {renderFamilyRow("Сиблинги", familyMembers.siblings, "G4M-5AVV-KAV")}
+          {renderFamilyRow("Супруги", familyMembers.spouses, "G4M-5AVV-KAV")}
+          {renderFamilyRow("Дети", familyMembers.kids, "G4M-5AVV-KAV")}
+        </div>
+      );
+    }
+    
+    function PlacesSection({ activeCardId, person, places, openModal }) {
+      const activeCard = person.find((item) => item.id === activeCardId);
+      if (!activeCard) return null;
+
+      const previousCards = person.slice(0, person.indexOf(activeCard) + 1);
+
+      const findLastPlace = (type) => {
+        for (let i = previousCards.length - 1; i >= 0; i--) {
+          const card = previousCards[i];
+          if (card.places) {
+            const place = card.places.find((p) => p.type === type);
+            if (place) {
+              const placeInfo = places.find((p) => p.id === place.id);
+              if (placeInfo) {
+                return { ...placeInfo, status: place.status };
+              }
+            }
+          }
+        }
+        return null;
+      };
+
+      const findActiveJobs = () => {
+        const allJobs = [];
+        for (let i = 0; i < previousCards.length; i++) {
+          const card = previousCards[i];
+          if (card.places) {
+            card.places.forEach((place) => {
+              if (place.type === "job") {
+                const placeInfo = places.find((p) => p.id === place.id);
+                if (placeInfo) {
+                  allJobs.push({
+                    ...placeInfo,
+                    status: place.status,
+                    date: card.date,
+                  });
+                }
+              }
+            });
+          }
+        }
+
+        allJobs.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        const activeJobs = [];
+        for (let i = 0; i < allJobs.length; i++) {
+          const job = allJobs[i];
+          const existingJobIndex = activeJobs.findIndex((j) => j.id === job.id);
+
+          if (job.status === "completed") {
+            if (existingJobIndex !== -1) {
+              activeJobs.splice(existingJobIndex, 1);
+            }
+          } else if (job.status === "active") {
+            if (existingJobIndex === -1) {
+              activeJobs.push({ ...job });
+            }
+          }
+        }
+
+        return activeJobs;
+      };
+
+      const lastAddress = findLastPlace("address");
+      const lastEducationPlace = findLastPlace("education");
+      const activeJobs = findActiveJobs();
+
+      const renderPlaceCard = (place, type) => {
+        return (
+          <div className="place-card" onClick={() => openModal(place, 'place')}>
+            <img src={place.image} alt={place.name} className="place-image" />
+            <p className="place-address">{place.name}</p>
+            {type === "education" && place.status === "completed" && (
+              <span className="done-icon">✓</span>
+            )}
+          </div>
+        );
+      };
+
+      return (
+        <div className="places">
+          {lastAddress && (
+            <div className="place-category">
+              <h3>Место жительства</h3>
+              {renderPlaceCard(lastAddress, "address")}
+            </div>
+          )}
+          {lastEducationPlace && (
+            <div className="place-category">
+              <h3>Образование</h3>
+              {renderPlaceCard(lastEducationPlace, "education")}
+            </div>
+          )}
+          {activeJobs.length > 0 && (
+            <div className="place-category">
+              <h3>Работа</h3>
+              <div className="job-cards">
+                {activeJobs.map((job, index) => (
+                  <div
+                    key={index}
+                    className="place-card"
+                    style={{ zIndex: activeJobs.length - index }}
+                    onClick={() => openModal(job, 'place')}
+                  >
+                    <img src={job.image} alt={job.name} className="place-image" />
+                    <p className="place-address">{job.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+        function StoryField({ openModal, activeCardId, tree, person, activeCardDate }) {
+          const currentPerson = findPersonById("G4M-5AVV-KAV", tree);
+          if (!currentPerson) {
+            console.error("Person not found");
+            return <div>Персона не найдена</div>;
+          }
+
+          return (
+            <div className="story">
+              <div className="name">
+                <h1>{currentPerson.name} {currentPerson.surname}</h1>
+              </div>
+
+              <Family activeCardId={activeCardId} person={person} tree={tree} openModal={openModal} />
+
+              <div className="status-medals-salary">
+                <div className="left-part">
+                  <Status openModal={openModal} activeCardId={activeCardId} person={person} />
+                  <Medals openModal={openModal} activeCardId={activeCardId} person={person} />
+                </div>
+                <Salary openModal={openModal} activeCardDate={activeCardDate} person={person} activeCardId={activeCardId} />
+              </div>
+
+              <PlacesSection activeCardId={activeCardId} person={person} places={places} openModal={openModal} />
+            </div>
+          );
+        }
+        
+
+
+
+function App({ person = [], timeline = [], tree = [] }) {
+  const [activeCardId, setActiveCardId] = React.useState(null);
+  const [activeCardDate, setActiveCardDate] = React.useState(null);
+  const [modalContent, setModalContent] = React.useState(null);
+  const [modalType, setModalType] = React.useState(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  const openModal = (content, type) => {
+    setModalContent(content);
+    setModalType(type);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalContent(null);
+    setModalType(null);
+    setIsModalOpen(false);
+  };
+
+  const activeCardIdFromHook = useActiveCard(person);
+
+  React.useEffect(() => {
+    if (activeCardIdFromHook) {
+      const activeCard = document.querySelector(`.card[data-id="${activeCardIdFromHook}"]`);
+      if (activeCard) {
+        const dateText = activeCard.querySelector('.date').textContent;
+        setActiveCardDate(dateText);
+      }
+    }
+    setActiveCardId(activeCardIdFromHook);
+  }, [activeCardIdFromHook]);
+
+  useSyncScroll(person);
 
   return (
     <section className="fieldforperson">
       <section className="story">
-        {/* Отображаем изображение в поле story, если оно есть */}
-        {storyImage && (
-          <img
-            src={storyImage}
-            alt="Story"
-            className={`story-image ${isStoryImageVisible ? 'visible' : ''}`}
-          />
-        )}
+        <StoryField
+          openModal={openModal}
+          activeCardId={activeCardId}
+          tree={tree}
+          person={person}
+          activeCardDate={activeCardDate}
+        />
       </section>
       <section className="lineoflife">
         <CardList person={person} activeCardId={activeCardId} openModal={openModal} />
@@ -268,13 +654,48 @@ function useSyncTimelineScroll(activeCardId, timeline) {
       </section>
 
       {/* Модальное окно */}
-      {modalImageUrl && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="close-modal" onClick={closeModal}>×</button>
-            <img src={modalImageUrl} alt="Document" />
-          </div>
+      {isModalOpen && (
+      <div className="modal-overlay" onClick={closeModal}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <button className="close-modal" onClick={closeModal}>×</button>
+          {modalType === 'document' && (
+            <img src={modalContent} alt="Document" className="modal-image" />
+          )}
+          {(modalType === 'place' || modalType === 'medal' || modalType === 'status' || modalType === 'money') && (
+            <div className="modal-content place-modal">
+              <img src={modalContent.image} alt={modalContent.title || modalContent.name} className="modal-image" />
+              <div className="modal-text">
+                <h3 className="modal-title">{modalContent.title || modalContent.name}</h3>
+                <p className="modal-description">{modalContent.description || modalContent.describtion}</p>
+              </div>
+            </div>
+          )}
+          {modalType === 'family' && modalContent && (
+            <div className="modal-content family-modal">
+              <div
+                className="modal-portrait"
+                style={{backgroundPosition: getSpritePositionLarge(modalContent.portrait)}}
+              ></div>
+              <h3 className="modal-title">
+                {modalContent.name} {modalContent.surname}
+                {modalContent.maidenName && ` (ур. ${modalContent.maidenName})`}
+              </h3>
+              <p className="modal-dates">
+                {modalContent.birthDate || "?"} - {modalContent.deathDate || "?"}
+              </p>
+              <p className="modal-bio">{modalContent.bio}</p>
+              <button
+                className="modal-button"
+                onClick={() => {
+                  console.log(`Переход на страницу ${modalContent.name}`);
+                }}
+              >
+                Перейти на страницу 
+              </button>
+            </div>
+          )}
         </div>
+      </div>
       )}
     </section>
   );
@@ -283,7 +704,7 @@ function useSyncTimelineScroll(activeCardId, timeline) {
     // Рендеринг приложения
     const container = document.getElementById('root');
     const root = ReactDOM.createRoot(container);
-    root.render(<App person={KAV} timeline={worldAndRussianTimeline} />);
+    root.render(<App person={KAV} timeline={worldAndRussianTimeline} tree={tree} />);
   </script>
 </body>
 </html>
