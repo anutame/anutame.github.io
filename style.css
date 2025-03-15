@@ -1,0 +1,768 @@
+:root {
+  --animation-duration: 0.8s;
+}
+
+@font-face {
+  font-family: "Nunito";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/Nunito-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Nunito";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/Nunito-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Nunito";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("../fonts/Nunito-Black.woff2") format("woff2");
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", sans-serif;
+  font-size: 20px;
+  line-height: 28px;
+  color: white;
+  background: black;
+}
+
+.fieldforperson {
+    display: flex; /* Используем Flexbox для разделения на три части */
+    height: 100vh; /* Занимаем всю высоту экрана */
+  }
+  
+  .story {
+    flex: 2; /* Занимает 2 части из 3 */
+    background-color: #f9f9f9; /* Цвет фона для инфографики */
+    padding: 20px; /* Внутренний отступ */
+  }
+  
+  .lineoflife {
+    flex: 1; /* Занимает 1 часть из 3 */
+    background-color: #e9e9e9; /* Цвет фона для списка карточек */
+    padding: 10px; /* Внутренний отступ */
+    overflow-y: auto; /* Добавляем скролл, если карточек много */
+  }
+            /* Стилизация скроллбара для WebKit-браузеров */
+            .lineoflife::-webkit-scrollbar {
+                width: 6px; /* Ширина скроллбара */
+            }
+            
+            .lineoflife::-webkit-scrollbar-track {
+                background: #f1f1f1; /* Цвет трека */
+                border-radius: 3px; /* Скругление углов трека */
+            }
+            
+            .lineoflife::-webkit-scrollbar-thumb {
+                background: #888; /* Цвет ползунка */
+                border-radius: 3px; /* Скругление углов ползунка */
+            }
+            
+            .lineoflife::-webkit-scrollbar-thumb:hover {
+                background: #555; /* Цвет ползунка при наведении */
+            }
+  
+  .timeline {
+    width: 200px; /* Фиксированная ширина */
+    background-color: #d9d9d9; /* Цвет фона для навигатора времени */
+    padding: 20px; /* Внутренний отступ */
+    overflow-y: hidden; /* Добавляем скролл */
+    scroll-behavior: smooth; /* Плавная прокрутка */
+  }
+  
+  .timeline-events {
+    list-style: none; /* Убираем маркеры списка */
+    padding: 0; /* Убираем отступы у списка */
+    margin: 0; /* Убираем внешние отступы */
+  }
+  
+  .timeline-event {
+    margin-bottom: 20px; /* Отступ между событиями */
+    padding: 10px;
+    background-color: white; /* Цвет фона события */
+    border-radius: 5px; /* Скругленные углы */
+  }
+  
+  .timeline-event h3 {
+    font-size: 18px; /* Размер заголовка года */
+    margin-bottom: 10px; /* Отступ снизу */
+    color: #333;
+  }
+  
+  .timeline-event p {
+    font-size: 14px; /* Размер текста события */
+    color: #666; /* Цвет текста события */
+    margin-bottom: 5px; /* Отступ снизу */
+  }
+  
+  .cards {
+    list-style: none; /* Убираем маркеры списка */
+    padding: 0; /* Убираем отступы у списка */
+    margin: 0; /* Убираем внешние отступы */
+  }
+
+
+  .card {
+    display: flex;
+    align-items: center; /* Выравнивание по вертикали */
+    background-color: none; /* Цвет фона карточки */
+    margin-bottom: 10px; /* Отступ между карточками */
+    position: relative; /* Для позиционирования псевдоэлемента */
+    padding-left: 0px; /* Отступ слева, чтобы линия не накладывалась на бусину */
+  }
+  
+  .age {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px; /* Ширина круга */
+    height: 50px; /* Высота круга */
+    color: black;
+    background-color: white; /* Цвет круга */
+    border-radius: 50%; /* Делаем круг */
+    font-size: 14px; /* Размер текста */
+    font-weight: bold; /* Жирный текст */
+    margin-right: 10px; /* Отступ между кругом и информацией */
+    position: relative; /* Для позиционирования линии */
+    z-index: 1; /* Чтобы бусина была над линией */
+  }
+      .card.active .age {
+        border: 2px solid #ff5722; /* Контрастная обводка для бусины */
+      }
+      
+      .card.active .information {
+        border: 2px solid #ff5722; /* Контрастная обводка для информации */
+        box-shadow: 0 0 10px rgba(255, 87, 34, 0.5); /* Тень для выделения */
+      } 
+  /* Вертикальная линия (нить) между бусинами */
+  .card:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 50%; /* Начинается от центра текущей бусины */
+    left: 23px;/* Центрируем линию относительно бусины (40px padding + 10px половина ширины бусины) */
+    transform: translateY(-50%); /* Смещаем линию вверх на половину ее высоты */
+    width: 3px; /* Ширина линии */
+    height: calc(100% + 10px); /* Высота линии (на всю высоту карточки, включая отступ) */
+    background-color: #4d4d4d; /* Цвет линии */
+    z-index: 0; /* Линия под бусиной */
+  }
+  
+  /* Первая карточка: линия начинается от центра бусины */
+  .card:first-child::after {
+    top: 100%; /* Начинается от центра первой бусины */
+  }
+  
+/* Последняя карточка: добавляем отдельную линию под последней бусиной */
+.card:last-child::before {
+    content: '';
+    position: absolute;
+    top: -10px; /* Начинается от центра последней бусины */
+    left: 24px; /* Центрируем линию относительно бусины */
+    transform: translateX(-50%); /* Точное центрирование */
+    width: 3px; /* Ширина линии */
+    height: 50%; /* Линия заканчивается под последней бусиной */
+    background-color: #4d4d4d; /* Цвет линии */
+    z-index: 0; /* Линия под бусиной */
+  }       
+          
+  .information {
+    flex: 1; /* Занимает оставшееся пространство */
+    background-color: white; /* Цвет фона информации */
+    padding: 10px; /* Внутренний отступ */
+    border-radius: 8px; /* Скругленные углы */
+    padding-left: 20px;
+  }
+  
+  .date {
+    font-size: 12px; /* Размер текста даты */
+    color: #666; /* Цвет текста даты */
+    margin-bottom: 10px; /* Отступ снизу */
+  }
+  
+  h2 {
+    font-size: 16px; /* Размер заголовка */
+    margin-bottom: 5px; /* Отступ снизу */
+    color: #333;
+  }
+  
+  .description {
+    font-size: 14px; /* Размер текста описания */
+    color: #333; /* Цвет текста описания */
+  }
+
+  /* Стили для модального окна */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: auto;
+  }
+  
+  .modal-content img {
+    max-width: 100%;
+    max-height: 80vh;
+    display: block;
+    margin: 0 auto;
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+  }
+  
+  .close-modal:hover {
+    color: #000;
+  }
+  /* Стили для модального окна с типом 'place' */
+.modal-content.place-modal {
+  display: flex;
+  align-items: flex-start; /* Выравнивание по верхнему краю */
+  gap: 20px; /* Расстояние между картинкой и текстом */
+}
+
+.modal-content.place-modal img {
+  margin-top: 30px;
+  width: 200px; /* Ширина картинки */
+  height: auto; /* Сохраняем пропорции */
+  border-radius: 10px; /* Скругление углов */
+}
+
+.modal-content.place-modal .modal-text {
+  flex: 1; /* Текст занимает оставшееся пространство */
+  color: black; /* Черный цвет текста */
+}
+
+.modal-content.place-modal .modal-title {
+  font-size: 24px; /* Размер заголовка */
+  margin-bottom: 10px; /* Отступ снизу */
+  color: black; /* Черный цвет заголовка */
+}
+
+.modal-content.place-modal .modal-description {
+  font-size: 16px; /* Размер текста */
+  line-height: 1.5; /* Межстрочный интервал */
+  color: black; /* Черный цвет текста */
+}
+
+/* Стили для модального окна с типом 'family' */
+/* Стили для модального окна */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+}
+
+/* Кнопка закрытия модального окна */
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+  z-index: 1001; /* Убедимся, что кнопка всегда поверх содержимого */
+}
+
+.close-modal:hover {
+  color: #000;
+}
+
+/* Стили для модального окна с типом 'family' */
+.modal-content.family-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px; /* Расстояние между элементами */
+  color: #333; /* Темно-серый цвет текста */
+  max-width: 500px; /* Максимальная ширина модального окна */
+  padding: 40px 20px 20px; /* Увеличили верхний отступ, чтобы кнопка закрытия не перекрывалась */
+}
+
+/* Портрет в модальном окне */
+.modal-content.family-modal .modal-portrait {
+  width: 150px; /* Размер портрета */
+  height: 150px;
+  border-radius: 50%; /* Делаем портрет круглым */
+  object-fit: cover; /* Сохраняем пропорции */
+  border: 3px solid #ccc; /* Рамка вокруг портрета */
+}
+
+/* Заголовок в модальном окне */
+.modal-content.family-modal .modal-title {
+  font-size: 24px; /* Размер заголовка */
+  font-weight: bold; /* Жирный шрифт */
+  color: #333; /* Темно-серый цвет */
+  text-align: center; /* Выравнивание по центру */
+  margin: 0; /* Убираем отступы */
+}
+
+/* Даты в модальном окне */
+.modal-content.family-modal .modal-dates {
+  font-size: 16px; /* Размер текста */
+  color: #666; /* Серый цвет для дат */
+  text-align: center; /* Выравнивание по центру */
+  margin: 0; /* Убираем отступы */
+}
+
+/* Биография в модальном окне */
+.modal-content.family-modal .modal-bio {
+  font-size: 14px; /* Размер текста */
+  color: #444; /* Темно-серый цвет */
+  text-align: justify; /* Выравнивание по ширине */
+  line-height: 1.5; /* Межстрочный интервал */
+  margin: 0; /* Убираем отступы */
+}
+
+/* Кнопка в модальном окне */
+.modal-content.family-modal .modal-button {
+  background-color: #ff5722; /* Оранжевый цвет кнопки */
+  color: white; /* Белый текст */
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px; /* Скругление углов */
+  font-size: 16px; /* Размер текста */
+  cursor: pointer; /* Курсор при наведении */
+  margin-top: 15px; /* Отступ сверху */
+  transition: background-color 0.3s ease; /* Плавный переход */
+}
+
+/* Эффект при наведении на кнопку */
+.modal-content.family-modal .modal-button:hover {
+  background-color: #e64a19; /* Темнее оранжевый при наведении */
+}
+.modal-portrait{
+  background-image: url('../img/family-sprites.PNG'); /* Путь к спрайту */
+  background-size: 1500px 600px; /* Масштабируем спрайт (1000px / 2 = 500px, 400px / 2 = 200px) */
+  width: '150px';
+  height: '150px';
+  border-radius: '50%';
+  border: '3px solid #ccc';
+}
+  /* Стили для иконки документа */
+  .doc-icon {
+    cursor: pointer;
+    margin-top: 5px;
+    text-align: right;
+  }
+  
+  .doc-icon img {
+    width: 25px;
+    height: 25px;
+  }
+
+  /* Стили для поля story */
+  .story {
+    flex: 2; /* Занимает 2 части из 3 */
+    background-color: #f9f9f9;
+    padding: 10px; /* Уменьшили отступы */
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Уменьшили gap между блоками */
+    height: calc(100vh - 20px); /* Высота равна высоте окна минус отступы */
+    overflow-y: auto; /* Добавляем прокрутку, если контент не помещается */
+  }
+  
+  /* 1. Name */
+  .name h1 {
+    font-size: 32px;
+    color: #333;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 10px; /* Уменьшили отступ */
+  }
+  
+  /* 2. Family */
+  .family {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .family-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .family-row h2 {
+    font-size: 18px;
+    color: #444;
+    margin-right: 10px;
+  }
+  
+  .icons {
+    display: flex;
+    gap: 5px;
+  }
+  
+  .family-icon {
+    width: 50px;
+    height: 50px;
+    background-image: url('../img/family-sprites.PNG');
+    background-size: 500px 200px;
+    background-repeat: no-repeat;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    cursor: pointer;
+  }
+  
+  .family-icon.dead {
+    position: relative;
+    filter: grayscale(100%); /* Черно-белый фильтр */
+    border: 3px solid black; /* Траурная рамка */
+  }
+  
+  .family-icon.dead::after {
+    content: '✝';
+    position: absolute;
+    bottom: -10px;
+    left: 0px;
+    font-size: 15px;
+    color: black;
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 20%;
+    padding: 2px;
+    pointer-events: none; /* Чтобы крестик не мешал кликам */
+  }
+  
+ 
+  
+  .family-icon.divorced {
+    opacity: 0.5; /* Бледный портрет для разведенных */
+  }
+  
+  .family-icon.highlighted {
+    border: 3px solid #ff5722; /* Контрастная рамка для активной персоны */
+    box-shadow: 0 0 10px rgba(255, 87, 34, 0.5); /* Тень для выделения */
+  }
+  
+  .family-row {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Уменьшили отступы между элементами */
+  }
+  
+  .family-row h2 {
+    font-size: 18px;
+    color: #444;
+    margin-right: 5px;
+  }
+  
+  .family-row .icons {
+    display: flex;
+    gap: 5px; /* Уменьшили отступы между иконками */
+  }
+  
+ 
+  .family-icon:hover {
+    background-color: #f0f0f0; /* Изменение фона при наведении */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Увеличение тени */
+    transform: translateY(-2px); /* Легкое смещение вверх */
+    transition: all 0.3s ease; /* Плавный переход */
+  }
+
+  /* Стиль для выделенного портрета */
+  .family-icon.highlighted {
+    border: 3px solid #ff5722; /* Контрастная рамка */
+    box-shadow: 0 0 10px rgba(255, 87, 34, 0.5); /* Тень для выделения */
+  }
+
+  
+  /* 3. Status, Medals и Salary */
+  .status-medals-salary {
+    display: flex;
+    gap: 5px; /* Уменьшили gap между блоками */
+  }
+  
+  .left-part {
+    flex: 3; /* 75% ширины */
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Уменьшили gap между элементами */
+  }
+  
+  /* 3. Status */
+  /* Общий стиль для всех карточек */
+.status, .medals, .salary-card, .place-card {
+  box-sizing: border-box; /* Учитываем padding и border в ширине и высоте */
+}
+
+/* 3. Status */
+.status {
+  width: 100%; /* Занимает всю ширину left-part */
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer; 
+}
+.status:hover {
+  background-color: #f0f0f0; /* Изменение фона при наведении */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Увеличение тени */
+  transform: translateY(-2px); /* Легкое смещение вверх */
+  transition: all 0.3s ease; /* Плавный переход */
+}
+.status h2 {
+  display: none; /* Скрыли заголовок статуса */
+}
+
+.status p {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: bold; /* Сделали текст жирным */
+}
+
+/* 4. Medals */
+
+.medals {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  min-height: 140px; /* Минимальная высота для сохранения места */
+  align-items: center; /* Выравнивание по центру */
+  justify-content: flex-start; /* Выравнивание по левому краю */
+}
+
+.medals-placeholder {
+  width: 90px;
+  height: 120px;
+  padding-top: auto;
+  text-align: center;
+  color: #666; /* Серый цвет текста */
+  font-size: 14px;
+  padding: 10px;
+  background-color: #f0f0f0; /* Светлый фон */
+  border-radius: 10px; /* Скругленные углы */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Легкая тень */
+}
+
+.medal-card {
+  background-color: #fff;
+  height: 140px;
+  padding: 5px; /* Уменьшили отступы внутри карточки */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 90px; /* Уменьшили ширину карточки */
+  cursor: pointer; 
+}
+.medal-card:hover {
+  background-color: #f0f0f0; /* Изменение фона при наведении */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Увеличение тени */
+  transform: translateY(-2px); /* Легкое смещение вверх */
+  transition: all 0.3s ease; /* Плавный переход */
+}
+
+.medal-image {
+  width: 75px; /* Уменьшили размер изображения */
+  height: 75px;
+  object-fit: cover; /* Сохраняем пропорции изображения */
+  margin-bottom: 5px; /* Уменьшили отступ между изображением и текстом */
+}
+
+.medal-name {
+  font-size: 12px; /* Уменьшили размер шрифта */
+  color: #333;
+  margin: 0; /* Убираем отступы у текста */
+  line-height: 1.2; /* Уменьшили межстрочный интервал */
+}
+
+/* 5. Salary */
+/* Стили для карточки Salary */
+.salary {
+  flex: 1; /* 25% ширины */
+  display: flex;
+  margin-top: auto;
+  flex-direction: column;
+  gap: 5px; /* Уменьшили отступ между карточками */
+}
+
+.salary-card {
+  background-color: #fff;
+  padding: 10px; /* Уменьшили отступы внутри карточки */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  height: 100px;
+}
+
+.salary-card h3 {
+  font-size: 16px; /* Уменьшили размер шрифта заголовка */
+  color: #333;
+  margin: 0px; /* Отступ  */
+  text-align: center; /* Выравниваем заголовок по центру */
+}
+
+.salary-item {
+  display: flex;
+  align-items: center; /* Выравниваем элементы по вертикали */
+  gap: 5px; /* Расстояние между подзаголовком и суммой */
+}
+
+.salary-item:last-child {
+  margin-bottom: 0; /* Убираем отступ у последнего элемента */
+}
+
+.salary-label {
+  font-size: 14px; /* Уменьшили размер шрифта подзаголовка */
+  color: #666;
+  margin: 0; /* Убираем отступы */
+}
+
+.salary-amount {
+  font-size: 14px; /* Уменьшили размер шрифта суммы */
+  color: #333;
+  font-weight: bold; /* Делаем сумму жирной */
+  margin: 0; /* Убираем отступы */
+ 
+}
+
+/* 6. Places */
+.places {
+  display: grid;
+  grid-template-columns: 150px 150px 1fr; /* Первые две колонки по 150px, третья занимает оставшееся пространство */
+  gap: 10px; /* Отступ между категориями */
+  width: 100%; /* Занимает всю ширину родительского контейнера */
+}
+
+.place-category {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Отступ между карточками внутри категории */
+}
+
+.done-icon {
+  position: absolute;
+  top: 10px; /* Отступ сверху */
+  right: 10px; /* Отступ справа */
+  font-size: 20px; /* Размер галочки */
+  color: #4CAF50; /* Цвет галочки (зеленый) */
+  background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачный белый фон */
+  border-radius: 50%; /* Круглый фон */
+  width: 24px; /* Размер круга */
+  height: 24px; /* Размер круга */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Тень для выделения */
+  z-index: 1; /* Галочка поверх изображения */
+}
+
+
+.place-card:hover {
+  background-color: #f0f0f0; /* Изменение фона при наведении */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Увеличение тени */
+  transform: translateY(-2px); /* Легкое смещение вверх */
+  transition: all 0.3s ease; /* Плавный переход */
+}
+
+.place-card h3 {
+  margin: 0;
+  font-size: 12px; /* Размер шрифта заголовка */
+  color: #333;
+  text-align: left; /* Выравнивание текста по левому краю */}
+
+
+
+.place-category h3 {
+  font-size: 14px; /* Размер шрифта */
+  color: #333; /* Черный цвет текста */
+  margin: 0; /* Отступ  */
+  text-align: left; /* Выравнивание текста по левому краю */
+}
+
+
+.job-cards {
+  display: flex; /* Карточки выстраиваются в ряд */
+  flex-wrap: nowrap; /* Карточки не переносятся на новую строку */
+  gap: 5px; /* Фиксированное расстояние между карточками */
+  overflow: hidden; /* Скрываем полосу прокрутки */
+  position: relative; /* Для позиционирования карточек */
+  width: 100%; /* Ограничиваем ширину контейнера */
+}
+
+.place-card {
+  flex: 0 0 auto; /* Карточки не сжимаются и не растягиваются */
+  width: 150px; /* Ширина карточки */
+  height: 150px; /* Высота карточки */
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  padding: 10px;
+  position: relative; /* Для позиционирования галочки */
+  transition: transform 0.3s ease; /* Плавное смещение */
+}
+
+/* Стили для наложения карточек */
+.job-cards.overlapping .place-card {
+  position: absolute; /* Карточки накладываются друг на друга */
+  top: 0;
+  left: 0;
+  transform: translateX(calc(var(--index) * var(--shift))); /* Смещение карточек */
+  z-index: var(--index); /* Устанавливаем z-index для наложения */
+}
+
+.place-image {
+  width: 100px; /* Ширина изображения */
+  height: auto; /* Сохраняем пропорции */
+  margin-bottom: 5px; /* Отступ между изображением и текстом */
+}
+
+.place-address {
+  font-size: 14px;
+  color: #333;
+  margin: 0;
+  line-height: 1.2; /* Уменьшаем межстрочный интервал */
+}
